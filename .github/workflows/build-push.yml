@@ -1,5 +1,22 @@
 name: Build and Push Docker Image
 
+on:
+  workflow_call:
+    inputs:
+      service_name:
+        required: true
+        type: string
+      env:
+        required: true
+        type: string
+    secrets:
+      OCIR_USERNAME:
+        required: true
+      OCIR_AUTH_TOKEN:
+        required: true
+      IMAGE_REGISTRY:
+        required: true
+
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
@@ -25,17 +42,14 @@ jobs:
               exit 1
             fi
             IMAGE_TAG="$VERSION"
-            echo "trigger=tag" >> $GITHUB_OUTPUT
+            echo "::set-output name=image_tag::${IMAGE_TAG}"
           elif [[ "${GITHUB_REF_NAME}" == "blockchain-intl" ]]; then
-            # 如果是 blockchain-intl 分支，使用 latest 作为版本标签
             IMAGE_TAG="latest"
-            echo "trigger=branch" >> $GITHUB_OUTPUT
+            echo "::set-output name=image_tag::${IMAGE_TAG}"
           else
             echo "❌ 不支持的分支或 tag"
             exit 1
           fi
-
-          echo "image_tag=${IMAGE_TAG}" >> $GITHUB_OUTPUT
 
       # -------------------------
       # 登录 OCI Docker Registry（docker login）
@@ -63,5 +77,4 @@ jobs:
           docker build -t "$IMAGE" -f "ci-cd-template-repo/docker/Dockerfile.${{ inputs.service_name }}" .
           echo "Pushing Docker image: $IMAGE"
           docker push "$IMAGE"
-
-          echo "image_uri=${IMAGE}" >> $GITHUB_OUTPUT
+          echo "::set-output name=image_uri::${IMAGE}"
