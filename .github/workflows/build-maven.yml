@@ -9,11 +9,11 @@ on:
       env:
         required: true
         type: string
-    secrets:
-      MAVEN_REPO_USERNAME:
-        required: true
-      MAVEN_REPO_PASSWORD:
-        required: true
+    # secrets:
+    #   MAVEN_REPO_USERNAME:
+    #     required: true
+    #   MAVEN_REPO_PASSWORD:
+    #     required: true
 
 jobs:
   build:
