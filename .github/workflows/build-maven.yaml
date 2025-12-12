@@ -1,0 +1,46 @@
+name: Build Maven Project
+
+on:
+  workflow_call:
+    inputs:
+      service_name:
+        required: true
+        type: string
+      env:
+        required: true
+        type: string
+    secrets:
+      MAVEN_REPO_USERNAME:
+        required: true
+      MAVEN_REPO_PASSWORD:
+        required: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Checkout the repository
+      - name: Checkout Repo
+        uses: actions/checkout@v4
+
+      # Set up Java environment
+      - name: Set up JDK 17
+        uses: actions/setup-java@v2
+        with:
+          java-version: '17'
+
+      # Build the Maven project
+      - name: Build with Maven
+        run: |
+          mvn -U clean package -Dmaven.test.skip=true
+        # env:
+        #   MAVEN_REPO_USERNAME: ${{ secrets.MAVEN_REPO_USERNAME }}
+        #   MAVEN_REPO_PASSWORD: ${{ secrets.MAVEN_REPO_PASSWORD }}
+
+      # Upload the build artifact (optional)
+      - name: Upload Build Artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: build-output
+          path: target/*.jar
